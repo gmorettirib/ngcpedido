@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vamos voltar a nos falar?</title>
 <style>
   body {
@@ -82,173 +82,213 @@
     <button class="btn" onclick="SIM()">SIM</button>
     <button class="btn" onmouseover="desvia(this)">NÃO</button>
   </div>
-  <div id="mensagem">Agora somos bests de novo juju! 🦋💖</div>
+  <div id="mensagem">Agora somos bests de novo! 🦋💖</div>
   <canvas id="canvas"></canvas>
 
-  <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
 
-    let particles = [];
-    let showEffects = false;
+let particles = [];
+let showEffects = false;
 
-    class Butterfly {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.dx = (Math.random() - 0.5) * 3;
-        this.dy = (Math.random() - 0.5) * 3;
-        this.angle = Math.random() * 2 * Math.PI;
-        this.size = 10 + Math.random() * 10;
-        this.alpha = 1;
-        this.wingFlap = 0;
-        this.color = `hsl(${Math.random() * 360}, 70%, 70%)`;
+// Links das fotos (substitua pelos seus)
+const photoUrls = [
+  'foto1.png',
+  'foto2.png',
+  'foto3.png',
+  'foto4.png',
+  'foto5.png',
+  'foto6.png',
+  'foto7.png',
+  
+];
+const photos = [];
+photoUrls.forEach(url => {
+  const img = new Image();
+  img.src = url;
+  photos.push(img);
+});
+
+// Borboletas
+class Butterfly {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.dx = (Math.random() - 0.5) * 3;
+    this.dy = (Math.random() - 0.5) * 3;
+    this.angle = Math.random() * 2 * Math.PI;
+    this.size = 10 + Math.random() * 10;
+    this.alpha = 1;
+    this.wingFlap = 0;
+    this.color = `hsl(${Math.random() * 360}, 70%, 70%)`;
+  }
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.angle += 0.05;
+    this.wingFlap += 0.3;
+    this.alpha -= 0.005;
+    if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
+    if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.globalAlpha = this.alpha;
+    let wingScale = 0.5 + Math.abs(Math.sin(this.wingFlap)) * 0.8;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.ellipse(-this.size * 0.6, 0, this.size * 0.6, this.size * wingScale, 0, 0, Math.PI * 2);
+    ctx.ellipse(this.size * 0.6, 0, this.size * 0.6, this.size * wingScale, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, this.size * 0.15, this.size * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -this.size * 0.6);
+    ctx.lineTo(-this.size * 0.3, -this.size);
+    ctx.moveTo(0, -this.size * 0.6);
+    ctx.lineTo(this.size * 0.3, -this.size);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// Corações
+class Heart {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.dy = -1 - Math.random() * 1.5;
+    this.dx = (Math.random() - 0.5) * 1;
+    this.size = 8 + Math.random() * 8;
+    this.alpha = 1;
+    this.color = `hsl(${Math.random() * 360}, 90%, 70%)`;
+    this.angle = Math.random() * 2 * Math.PI;
+    this.spin = (Math.random() - 0.5) * 0.1;
+  }
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.alpha -= 0.008;
+    this.angle += this.spin;
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    const size = this.size;
+    ctx.beginPath();
+    ctx.moveTo(0, size * 0.25);
+    ctx.bezierCurveTo(0, 0, -size * 0.5, 0, -size * 0.5, size * 0.25);
+    ctx.bezierCurveTo(-size * 0.5, size * 0.6, 0, size * 0.9, 0, size);
+    ctx.bezierCurveTo(0, size * 0.9, size * 0.5, size * 0.6, size * 0.5, size * 0.25);
+    ctx.bezierCurveTo(size * 0.5, 0, 0, 0, 0, size * 0.25);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Fotos que crescem
+class Photo {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.dx = (Math.random() - 0.5) * 2;
+    this.dy = (Math.random() - 0.5) * 2;
+    this.startSize = 20;
+    this.size = this.startSize;
+    this.maxSize = 80 + Math.random() * 40;
+    this.alpha = 1;
+    this.angle = Math.random() * 2 * Math.PI;
+    this.spin = (Math.random() - 0.5) * 0.02;
+    this.img = photos[Math.floor(Math.random() * photos.length)];
+    this.growing = true;
+  }
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.angle += this.spin;
+
+    if (this.growing) {
+      this.size += 1.5;
+      if (this.size >= this.maxSize) {
+        this.growing = false;
       }
-      update() {
-        this.x += this.dx;
-        this.y += this.dy;
-        this.angle += 0.05;
-        this.wingFlap += 0.3;
-        this.alpha -= 0.005;
-
-        // Keep inside canvas with slight bounce
-        if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
-      }
-      draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-        ctx.globalAlpha = this.alpha;
-
-        // Wing flap effect: scale wings vertically with sine wave
-        let wingScale = 0.5 + Math.abs(Math.sin(this.wingFlap)) * 0.8;
-
-        // Left wing
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.ellipse(-this.size * 0.6, 0, this.size * 0.6, this.size * wingScale, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Right wing
-        ctx.beginPath();
-        ctx.ellipse(this.size * 0.6, 0, this.size * 0.6, this.size * wingScale, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Body
-        ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, this.size * 0.15, this.size * 0.7, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Antennae
-        ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(0, -this.size * 0.6);
-        ctx.lineTo(-this.size * 0.3, -this.size);
-        ctx.moveTo(0, -this.size * 0.6);
-        ctx.lineTo(this.size * 0.3, -this.size);
-        ctx.stroke();
-
-        ctx.restore();
-      }
+    } else {
+      this.alpha -= 0.008;
     }
 
-    class Heart {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.dy = -1 - Math.random() * 1.5;
-        this.dx = (Math.random() - 0.5) * 1;
-        this.size = 8 + Math.random() * 8;
-        this.alpha = 1;
-        this.color = `hsl(${Math.random() * 360}, 90%, 70%)`;
-        this.angle = Math.random() * 2 * Math.PI;
-        this.spin = (Math.random() - 0.5) * 0.1;
-      }
-      update() {
-        this.x += this.dx;
-        this.y += this.dy;
-        this.alpha -= 0.008;
-        this.angle += this.spin;
-      }
-      draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-        ctx.globalAlpha = this.alpha;
-        ctx.fillStyle = this.color;
+    if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
+    if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.globalAlpha = this.alpha;
+    ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
+    ctx.restore();
+  }
+}
 
-        // Draw heart shape using bezier curves
-        ctx.beginPath();
-        const size = this.size;
-        ctx.moveTo(0, size * 0.25);
-        ctx.bezierCurveTo(0, 0, -size * 0.5, 0, -size * 0.5, size * 0.25);
-        ctx.bezierCurveTo(-size * 0.5, size * 0.6, 0, size * 0.9, 0, size);
-        ctx.bezierCurveTo(0, size * 0.9, size * 0.5, size * 0.6, size * 0.5, size * 0.25);
-        ctx.bezierCurveTo(size * 0.5, 0, 0, 0, 0, size * 0.25);
-        ctx.closePath();
-        ctx.fill();
+function createButterfly() {
+  particles.push(new Butterfly(Math.random() * canvas.width, Math.random() * canvas.height));
+}
+function createHeart() {
+  particles.push(new Heart(Math.random() * canvas.width, canvas.height + 20));
+}
+function createPhoto() {
+  particles.push(new Photo(Math.random() * canvas.width, Math.random() * canvas.height));
+}
 
-        ctx.restore();
-      }
+function animate() {
+  requestAnimationFrame(animate);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    let p = particles[i];
+    p.update();
+    p.draw();
+    if (p.alpha <= 0) {
+      particles.splice(i, 1);
     }
+  }
+  if (showEffects) {
+    if (Math.random() < 0.07) createButterfly();
+    if (Math.random() < 0.04) createHeart();
+    if (Math.random() < 0.03) createPhoto();
+  }
+}
 
-    function createButterfly() {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      particles.push(new Butterfly(x, y));
-    }
+function SIM() {
+  showEffects = true;
+  document.getElementById('conteudo').style.display = 'none';
+  document.getElementById('mensagem').style.display = 'block';
+}
 
-    function createHeart() {
-      const x = Math.random() * canvas.width;
-      const y = canvas.height + 20;
-      particles.push(new Heart(x, y));
-    }
+function desvia(btn) {
+  btn.style.position = 'absolute';
+  btn.style.top = Math.random() * 80 + '%';
+  btn.style.left = Math.random() * 80 + '%';
+}
 
-    function animate() {
-      requestAnimationFrame(animate);
-      // Fading background for trail effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+animate();
+</script>
 
-      for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.update();
-        p.draw();
-
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-        }
-      }
-
-      if (showEffects) {
-        if (Math.random() < 0.07) createButterfly();
-        if (Math.random() < 0.04) createHeart();
-      }
-    }
-
-    function SIM() {
-      showEffects = true;
-      document.getElementById('conteudo').style.display = 'none';
-      const msg = document.getElementById('mensagem');
-      msg.style.display = 'block';
-    }
-
-    function desvia(btn) {
-      btn.style.position = 'absolute';
-      btn.style.top = Math.random() * 80 + '%';
-      btn.style.left = Math.random() * 80 + '%';
-    }
-
-    animate();
-  </script>
 </body>
 </html>
